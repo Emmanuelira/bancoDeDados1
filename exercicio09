@@ -1,0 +1,61 @@
+create database playlist;
+use playlist;
+
+create table dono (
+id_dono int auto_increment,
+nome_dono varchar(200) not null,
+primary key(id_dono));
+
+create table disco (
+id_disco int auto_increment,
+id_dono int not null,
+autor varchar(200) not null,
+ano smallint not null,
+foreign key(id_dono) references dono(id_dono),
+primary key(id_disco));
+
+insert into dono (nome_dono)
+values ('Rodrigo'),
+('Denilson'),
+('Bruno');
+
+insert into disco (id_dono, autor, ano)
+values ('1', 'Edson Gomes', '2006'),
+('2', 'Biquíni Cavadão', '2007'),
+('1', 'Amazan', '2004'),
+('1', 'RPM', '2002'),
+('3', 'Chico de Janes', '2012'),
+('2', 'Engenheiros', '2007'),
+('3', 'Gil Forrozeiro', '2013'),
+('1', 'Roberto Carlos', '2003');
+
+delete from disco where autor='Gil Forrozeiro';
+update disco set id_dono='2' where autor='RPM';
+
+insert into dono(nome_dono)
+values('Luis');
+
+insert into disco(id_dono, autor, ano)
+values('4', 'Luan Estilizado', '2019');
+
+update disco set id_dono='2' where id_dono='1';
+update disco set id_dono='4' where id_dono='3';
+
+delete from dono where id_dono='1';
+delete from dono where id_dono='3';
+update disco set ano='1996' where autor='Roberto Carlos';
+
+alter table disco
+add preco double;
+
+update disco set preco='10';
+update disco set preco='50' where autor='Roberto Carlos';
+
+update disco set preco = 
+	case
+		when preco <= 15 then preco + 10
+		else preco + 20
+	end;
+    
+delete from disco where id_dono='2';
+delete from disco where ano < 2007;
