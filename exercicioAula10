@@ -1,0 +1,88 @@
+create database produtos;
+use produtos;
+
+create table cliente(
+idCliente int auto_increment,
+nome varchar(45) not null,
+primary key(idCliente)
+);
+
+create table pedido(
+idPedido int auto_increment,
+data date not null,
+localEntrega varchar(45) ,
+idCliente int not null,
+primary key(idPedido),
+foreign key(idCliente) references cliente (idCliente)
+);
+
+create table produto(
+idProduto int auto_increment,
+descricao varchar(45) not null,
+primary key(idProduto)
+);
+
+create table item (
+idProduto int,
+idPedido int,
+quantidade int not null,
+preco float not null,
+primary key(idProduto, idPedido),
+foreign key (idPedido) references pedido(idPedido),
+foreign key (idProduto) references produto(idProduto)
+);
+
+
+insert into cliente (nome) 
+values 
+('Paulo') ,
+('Paulo Henrique'),
+('Daniela'),
+('Camila'),
+('Pedro'),
+('Mateus'),
+('Viviane');
+
+insert into pedido(data, localEntrega, idCliente)
+values 
+('2020-03-01', 'Av Recife', 3 ),
+('2020-03-01', 'Av Caxangá', 2 ),
+('2020-03-02', 'Av Rui Freire', 1 ),
+('2020-03-02', 'Av Floriano Peixoto', 4 ),
+('2020-03-03', 'Av Recife', 5 );
+
+insert into pedido(data, idCliente)
+values ('2020-03-03', 6 );
+
+insert into produto(descricao)
+values
+('mouse'),
+('teclado'),
+('roteador'),
+('pendrive'),
+('hd externo'),
+('office 365'),
+('cartucho de tinta');
+
+insert into item (idproduto, idpedido, quantidade, preco)
+values 
+(1, 1, 2, 70),
+(2, 2, 5, 70), 
+(3, 1, 1, 100),
+(4, 3, 3, 100),
+(1, 3, 2, 70),
+(5, 3, 2, 500), 
+(6, 4, 1, 200),
+(7, 4, 3, 50);
+
+SELECT * FROM pedido AS p
+WHERE p.idCliente IN
+(SELECT idCliente
+FROM cliente WHERE nome='Mateus');
+
+create view vendas(idPedido, dataVenda, localEntrega, idProduto, idCliente, nomeCliente) 
+as select p.idPedido, p.data, p.localEntrega, i.idProduto, c.idCliente, c.nome
+from pedido p, item i, cliente c
+where p.idPedido = i.idPedido and p.idCliente = c.idCliente;
+
+select * from vendas;
