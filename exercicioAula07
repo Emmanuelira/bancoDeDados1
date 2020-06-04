@@ -1,0 +1,52 @@
+create database escola;
+use escola;
+
+create table aluno (
+matricula int,
+nome varchar(45),
+sexo char,
+primary key (matricula));
+
+create table professor (
+matricula int,
+nome varchar(45),
+salario float,
+titulacao varchar(45),
+primary key (matricula));
+
+create table curso (
+id int,
+nome varchar(45),
+primary key(id));
+
+create table disciplina (
+id int,
+nome varchar(45) unique,
+carga int,
+mat_professor int,
+id_curso int,
+foreign key(mat_professor) references professor (matricula),
+foreign key(id_curso) references curso (id),
+primary key(id));
+
+create table aluno_disciplina (
+matricula_aluno int,
+id_disciplina int,
+nota1 float,
+nota2 float,
+nota3 float,
+foreign key(matricula_aluno) references aluno (matricula),
+foreign key(id_disciplina) references disciplina (id),
+primary key(matricula_aluno, id_disciplina));
+
+drop table disciplina;
+drop table professor;
+
+create table professor (
+matricula int,
+nome varchar(45),
+salario float check (salario > 200),
+titulacao varchar(45) check (titulacao in ('Bacharel', 'Mestre', 'Doutor')),
+primary key(matricula));
+
+select * from aluno_disciplina;
