@@ -1,0 +1,69 @@
+create database DetranBD;
+use DetranBD;
+
+create table Proprietario(
+cpf char(11) check (lenght(cpf) = 11),
+nome varchar(200) NOT NULL,
+sexo char(1) NOT NULL CHECK(sexo IN ('F','M')), 
+data_nasc date NOT NULL,
+PRIMARY KEY(cpf));
+
+create table ProprietarioEndereco(
+cpfProprietario varchar(11),
+endereco varchar(45) NOT NULL,
+numero smallint NOT NULL,
+bairro varchar(45) NOT NULL,
+cidade varchar(45) NOT NULL,
+estado varchar(45) NOT NULL,
+pais varchar(45) NOT NULL,
+PRIMARY KEY (cpfProprietario));
+
+create table Veiculo(
+placa char(7),
+chassi char(17) NOT NULL,
+cor_predominante varchar(45) NOT NULL,
+modelo varchar(45) NOT NULL,
+categoria varchar(45) NOT NULL,
+ano_fabricacao smallint NOT NULL,
+cpf_proprietario bigint NOT NULL,
+FOREIGN KEY(cpf_proprietario) REFERENCES Proprietario(cpfProprietario),
+PRIMARY KEY(placa));
+
+create table Agente_Transito(
+id_agente int auto_increment,
+nome varchar(200) NOT NULL,
+senha char(10) NOT NULL,
+PRIMARY KEY(id_agente));
+
+create table Infracao(
+idInfracao int auto_increment,
+tipo char(5) NOT NULL CHECK(tipo IN('Leve', 'Média', 'Grave')),
+valor double NOT NULL,
+PRIMARY KEY(idInfracao));
+
+create table Multa(
+idMulta int auto_increment,
+placa_veiculo char(7) NOT NULL,
+id_infracao int NOT NULL,
+id_agente int NOT NULL,
+localMulta varchar(45) NOT NULL,
+dataMulta date NOT NULL,
+FOREIGN KEY(placa_veiculo) REFERENCES Veiculo(placa) ON DELETE CASCADE,
+FOREIGN KEY(id_infracao) REFERENCES Infracao(idInfracao) ON DELETE CASCADE,
+FOREIGN KEY(id_agente) REFERENCES Agente_Transito(id_agente) ON DELETE CASCADE,
+PRIMARY KEY(idMulta));
+
+alter table Proprietario
+add nacionalidade varchar(45) NOT NULL;
+
+alter table ProprietarioEndereco
+change endereco rua varchar(45) NOT NULL;
+
+alter table Infracao
+modify valor decimal(6,2);
+
+alter table Veiculo
+change cor_predominante cor varchar(45) NOT NULL;
+
+alter table Agente_Transito
+drop senha; 
