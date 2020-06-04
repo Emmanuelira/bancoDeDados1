@@ -1,0 +1,113 @@
+/*EXERCICIO DE REVISAO*/
+create database Produtos;
+use Produtos;
+
+create table cliente(
+idCliente int auto_increment,
+nome varchar(45) not null,
+constraint ct_pk_cliente primary key(idCliente));
+
+create table pedido(
+idPedido int auto_increment,
+data date not null,
+localEntrega varchar(45) not null,
+idCliente int not null,
+constraint ct_fk_pedido foreign key(idCliente) references cliente(idCliente) on delete restrict,
+constraint ct_pk_pedido primary key(idPedido));
+
+create table produto(
+idProduto int auto_increment,
+descricao varchar(45) not null,
+preco float not null,
+constraint ct_pk_produto primary key(idProduto));
+
+create table estoque(
+idProduto int,
+quantidade int not null,
+constraint ct_fk_produto foreign key(idProduto) references produto(idProduto),
+constraint ct_pk_produto primary key(idProduto));
+
+create table item(
+idProduto int,
+idPedido int,
+quantidade int not null,
+constraint ct_fk1_item foreign key(idProduto) references produto(idProduto),
+constraint ct_fk2_item foreign key(idPedido) references pedido(idPedido),
+constraint ct_pk_item primary key(idProduto, idPedido));
+
+insert into cliente(nome)
+values('Maria'),
+('Joao'),
+('Carlos'),
+('Lucas'),
+('Emmanuel'),
+('Jonas');
+
+insert into pedido(data, localEntrega, idCliente)
+values('2020-05-03', 'rua A', 1),
+('2020-01-22', 'rua B', 3),
+('2020-02-09', 'rua H', 1),
+('2020-04-14', 'rua B', 4),
+('2020-05-28', 'rua T', 2),
+('2020-03-01', 'rua B', 6);
+
+insert into produto(descricao, preco)
+values('vaso sanitário', 259.96),
+('lustre cascata led', 632.41),
+('porta madeira', 205.54),
+('argamassa acIII', 42.90),
+('tinta decora acetinado 18lt', 390.90),
+('chuveiro blindado', 190.99);
+
+insert into estoque(idProduto, quantidade)
+values(1, 25),
+(2, 6),
+(3, 30),
+(4, 300),
+(5, 35),
+(6, 15);
+
+insert into item(idProduto, idPedido, quantidade)
+values(1, 1, 2),
+(3, 2, 6),
+(1, 3, 1),
+(4, 4, 20),
+(3, 5, 4),
+(6, 6, 2);
+
+select avg(preco) from produto;
+select max(preco) from produto;
+select min(preco) from produto;
+select count(idPedido) from pedido;
+
+insert into item(idProduto, idPedido, quantidade)
+values(4, 1, 30);
+select sum(quantidade) as soma from item where item.idPedido = 1; 
+
+select idPedido, sum(quantidade) as soma_quant from item group by idPedido;
+select idPedido, sum(quantidade) as soma_quant from item group by idPedido
+having count(idPedido) > 3;
+
+select p.localEntrega as local_entrega, count(i.idPedido) as num_pedidos 
+from item i, pedido p 
+where p.idPedido = i.idPedido 
+group by localEntrega;
+
+create view pedidos(Cliente, ID, Data, Local_Entrega, Quant_Produtos)  
+as select p.idCliente, p.idPedido, p.data, p.localEntrega, sum(i.quantidade)  
+from pedido p, item i
+where p.idPedido = i.idPedido
+group by p.idPedido;
+
+select c.nome as nome_cliente, p.idPedido as pedido
+from cliente c inner join pedido p on c.idCliente = p.idCliente;
+
+select c.nome as nome_cliente, p.idPedido as pedido
+from cliente c left outer join pedido p on c.idCliente = p.idCliente;
+
+select c.nome as nome_cliente, p.idPedido as pedido
+from cliente c right outer join pedido p on c.idCliente = p.idCliente;
+
+update cliente set idCliente = 120 where nome = 'Jonas';
+
+select * from cliente;
