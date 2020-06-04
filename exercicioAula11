@@ -1,0 +1,97 @@
+create database empresa;
+use empresa;
+
+create table departamento (
+coddep int auto_increment,
+nome varchar(45) not null,
+constraint ct_pk_dep primary key(coddep));
+
+create table funcionario (
+cod int auto_increment,
+nome varchar(45) not null,
+especialidade varchar(45),
+depto int not null,
+constraint ct_fk_func foreign key(depto) references departamento(coddep),
+constraint ct_pk_func primary key(cod));
+
+create table dependente (
+cod int auto_increment,
+nome varchar(45) not null,
+cod_func int not null,
+constraint ct_fk_depend foreign key (cod_func) references funcionario(cod),
+constraint ct_pk_depend primary key(cod));
+
+create table projeto (
+idProjeto int auto_increment,
+nome varchar(45),
+constraint ct_pk_proj primary key(idProjeto));
+
+create table alocacao (
+codfuncionario int,
+codigoprojeto int,
+horas int not null,
+constraint ct_fk1_aloc foreign key(codfuncionario) references funcionario(cod),
+constraint ct_fk2_aloc foreign key(codigoprojeto) references projeto(idProjeto),
+constraint ct_pk_aloc primary key(codfuncionario, codigoprojeto));
+
+insert into departamento (nome)
+values('A'),
+('B'),
+('C'),
+('D'),
+('E'),
+('F'),
+('G'),
+('H'),
+('I'),
+('J');
+
+insert into funcionario (nome, especialidade, depto)
+values('joao', 'digitar', '1'),
+('mateus', 'imprimir', '2'),
+('lucas', 'jogar', '3'),
+('caio', 'digitar', '4'),
+('roberto', 'jogar', '5'),
+('pedro', 'defender', '6'),
+('jonas', 'imprimir', '7'),
+('antonio', 'apitar', '8'),
+('lisboa', 'gerenciar', '9'),
+('emmanuel', 'estudar', '10');
+
+insert into projeto (nome)
+values('casa'),
+('ap'),
+('lanchonete'),
+('restaurante'),
+('boi e brasa'),
+('dominos'),
+('subway'),
+('facisa'),
+('adventure club'),
+('start academia');
+
+insert into alocacao(codfuncionario, codigoprojeto, horas)
+values (1, 10, 25),
+(2, 9, 100),
+(3, 8, 210),
+(4, 7, 65),
+(5, 6, 13),
+(6, 5, 500),
+(7, 4, 469),
+(8, 3, 1236),
+(9, 2, 5000),
+(10, 1, 16000);
+
+insert into dependente (nome, cod_func)
+values('enzo',10),
+('valentina', 1);
+
+SELECT f.nome
+FROM Funcionario f
+WHERE not EXISTS (SELECT *
+FROM dependente d
+WHERE f.cod= d.cod_func);
+
+SELECT f.nome as NOME_FUNC, d.nome as NOME_DEP
+FROM funcionario f, dependente d
+WHERE f.cod = d.cod;
