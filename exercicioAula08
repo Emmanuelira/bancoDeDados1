@@ -1,0 +1,57 @@
+/*EXERCÍCIOS AULA 08*/
+
+insert into aluno (matricula, nome, sexo)
+values (15, 'Fábio', 'M');
+
+insert into professor (matricula, nome, salario, titulacao)
+values (14, 'Paulo', 1000, 'Mestre');
+
+insert into curso (id, nome)
+values (4, 'Matemática');
+
+insert into disciplina (id, nome, carga, mat_professor, id_curso)
+values (11, 'Álgebra', 40, 14, 4);
+
+insert into cursa (matricula_aluno, id_disciplina, nota1, nota2)
+values (15, 11, 7, 8);
+
+insert into aluno (matricula, nome, sexo)
+values (16, 'Fabiana', 'F');
+
+insert into professor (matricula, nome, salario, titulacao)
+values(15, 'Leonardo', 1500, 'Doutor');
+
+insert into disciplina (id, nome, carga, mat_professor, id_curso)
+values (12, 'Cálculo 1', 40, 15, 4);
+
+insert into cursa (matricula_aluno, id_disciplina, nota1, nota2)
+values (15, 12, 6.5, 7);
+
+insert into cursa (matricula_aluno, id_disciplina, nota1, nota2)
+values (16, 12, 9, 10);
+
+insert into cursa (matricula_aluno, id_disciplina, nota1, nota2)
+values (16, 11, 10, 10);
+
+select * from aluno;
+select matricula from aluno;
+select * from aluno where sexo = 'F';
+select * from professor;
+
+select * from cursa order by nota1 desc;
+select * from aluno order by nome asc; 
+
+select carga as carga_horaria from disciplina;
+select * from professor where titulacao = 'Doutor';
+select p.nome, d.nome from professor as p, disciplina as d where p.matricula = d.mat_professor;
+select a.matricula, a.nome from aluno as a, disciplina as d, cursa as c 
+where a.matricula = c.matricula_aluno and d.id = c.id_disciplina and d.nome = 'Álgebra';
+
+select a.nome from aluno as a, cursa as c, disciplina as d
+where c.nota2 > 7 and d.nome = 'Cálculo 1' and a.matricula = c.matricula_aluno and
+d.id = c.id_disciplina;
+select a.matricula, c.nota1 from aluno as a, disciplina as d, cursa as c
+where d.nome = 'Cálculo 1' and c.nota1 between 0 and 7 and a.matricula = c.matricula_aluno and
+d.id = c.id_disciplina;
+select nome from aluno where nome like '%o%';
+select nome from disciplina where nome like 'C%';
