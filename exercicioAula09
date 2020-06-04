@@ -1,0 +1,52 @@
+/*EXERCÍCIO AULA 9*/
+
+create database Veiculo;
+use Veiculo;
+
+create table Carro (
+placa varchar(7),
+modelo varchar(45) not null,
+cor varchar(45) not null,
+primary key(placa));
+
+insert into Carro (placa, modelo, cor)
+values ('A1', 'Chevrolet Chevette', 'Cinza'),
+('A2', 'Ferrari F350', 'Vermelho'),
+('A3', 'Lamborghini Aventador', 'Vermelho');
+ 
+ delete from Carro where cor='Cinza';
+ 
+ insert into Carro (placa, modelo, cor)
+ values ('A4', 'Gol', 'Preto'),
+ ('A5', 'Fiat 147', 'Amarelo'),
+ ('A6', 'Gol', 'Preto');
+ 
+ alter table Carro
+ add valor double;
+ 
+ update Carro set valor=20000 where placa='A2';
+ update Carro set valor=420600 where placa='A3';
+ update Carro set valor=35000 where placa='A4';
+ update Carro set valor=8000 where placa='A5';
+ update Carro set valor=35000 where placa='A6';
+ 
+ update Carro set valor = valor - 500;
+ update Carro set cor = 'Preto' where modelo = 'Fiat 147';
+ 
+ update Carro set valor = 
+	case
+		when valor > 30000 then valor - 1000
+		else valor - 500
+	end;
+
+update Carro set cor =
+	case
+		when cor='Preto' then 'Verde'
+		else 'Vermelho'
+	end;
+
+update Carro set cor='Amarelo' where placa='A6';
+update Carro set valor = valor * 1.1;
+update Carro set valor = valor - (valor*0.5) where modelo='Gol';
+ 
+ select * from Carro order by placa asc;
