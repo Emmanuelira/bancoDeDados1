@@ -1,0 +1,588 @@
+create database EmalysTur;
+use EmalysTur;
+
+create table Departamento(
+id int auto_increment,
+nome varchar(45) not null,
+constraint ct_pk_Dep primary key(id));
+
+create table Funcionario(
+matricula int auto_increment,
+nome varchar(150) not null,
+sexo char(1) not null check (sexo in ('M', 'F', 'O')),
+CPF char(11) not null unique check (length(CPF) = 11),
+data_nasc date not null,
+cargo varchar(45) not null,
+idDep int,
+constraint ct_pk_Fun primary key(matricula),
+constraint ct_fk_Fun foreign key (idDep) references Departamento(id) on delete restrict on update cascade);
+
+create table TelefoneFunc(
+numero_telefone bigint,
+matricula_func int,
+constraint ct_pk_TelFunc primary key (numero_telefone, matricula_func),
+constraint ct_fk_TelFunc foreign key (matricula_func) references Funcionario (matricula) on delete cascade on update cascade);
+
+create table EnderecoFunc(
+matricula_func int,
+rua varchar(45) not null,
+numero varchar(8) not null,
+bairro varchar(45) not null,
+CEP char(8) not null check (length(CEP) = 8),
+cidade varchar(45) not null,
+estado varchar(45) not null,
+constraint ct_pk_EndFunc primary key(matricula_func),
+constraint ct_fk_EndFunc foreign key(matricula_func) references Funcionario(matricula) on delete cascade on update cascade);
+
+create table Motorista(
+matricula_mot int,
+constraint ct_pk_Mot primary key(matricula_mot),
+constraint ct_fk_Mot foreign key(matricula_mot) references Funcionario(matricula) on delete cascade on update cascade);
+
+create table Vendedor(
+matricula_vend int,
+constraint ct_pk_Vend primary key(matricula_vend),
+constraint ct_fk_Vend foreign key(matricula_vend) references Funcionario(matricula) on delete cascade on update cascade);
+
+create table CNH(
+numero_CNH char(11) check(length(numero_CNH) = 11),
+matricula_mot int,
+categoria_CNH varchar(2) not null check(categoria_CNH in ('A', 'B', 'C', 'D', 'E', 'AB', 'AC', 'AD', 'AE')),
+vencimento date not null,
+constraint ct_pk_CNH primary key(numero_CNH, matricula_mot),
+constraint ct_fk_CNH foreign key(matricula_mot) references Motorista(matricula_mot) on delete cascade on update cascade);
+
+create table Onibus(
+numeracao_frota int,
+constraint ct_pk_Bus primary key(numeracao_frota));
+
+create table Apolice(
+num_apolice varchar(30),
+numeracao_frota int,
+vencimento date not null,
+constraint ct_pk_Apolice primary key(num_apolice, numeracao_frota),
+constraint ct_fk_Apolice foreign key(numeracao_frota) references Onibus(numeracao_frota) on delete cascade on update cascade);
+
+create table CRLV(
+renavam char(11) check (length(renavam) = 11),
+numeracao_frota int,
+capacidade int not null,
+ano int not null,
+tipo varchar(10) not null check(tipo in('RODOVIÁRIO','URBANO')),
+vencimento date not null,
+constraint ct_pk_CRLV primary key(renavam, numeracao_frota),
+constraint ct_fk_CRLV foreign key(numeracao_frota) references Onibus(numeracao_frota) on delete cascade on update cascade);
+
+create table Cliente(
+id int auto_increment,
+nome varchar(150) not null,
+constraint ct_pk_Cliente primary key(id));
+
+create table TelefoneCliente(
+numero_telefone bigint,
+id_cliente int,
+constraint ct_pk_TelC primary key(numero_telefone, id_cliente),
+constraint ct_fk_TelC foreign key(id_cliente) references Cliente(id) on delete cascade on update cascade);
+
+create table EnderecoCliente(
+id_cliente int,
+rua varchar(45) not null,
+numero varchar(8) not null,
+bairro varchar(45) not null,
+CEP char(8) not null check (length(CEP) = 8),
+cidade varchar(45) not null,
+estado varchar(45) not null,
+constraint ct_pk_EndC primary key(id_cliente),
+constraint ct_fk_EndC foreign key(id_cliente) references Cliente(id) on delete cascade on update cascade);
+
+create table PessoaFisica(
+CPF char(11) check (length(CPF) = 11),
+id_cliente int,
+data_nasc date not null,
+sexo char(1) not null check (sexo in ('M', 'F', 'O')),
+constraint ct_pk_PF primary key(CPF, id_cliente),
+constraint ct_fk_PF foreign key(id_cliente) references Cliente(id) on delete cascade on update cascade);
+
+create table PessoaJuridica(
+CNPJ char(14) check (length(CNPJ) = 14),
+id_cliente int,
+segmento varchar(45) not null,
+constraint ct_pk_PJ primary key(CNPJ, id_cliente),
+constraint ct_fk_PJ foreign key(id_cliente) references Cliente(id) on delete cascade on update cascade);
+
+create table ServicoFretamentoEventual(
+id_viagem int auto_increment,
+descricao_viagem varchar(200) not null,
+km_total double not null,
+valor_total double not null,
+quantidade_pessoas int not null,
+data_hora_ida datetime not null,
+data_hora_volta datetime not null,
+id_cliente int not null,
+matricula_vend int not null,
+constraint ct_pk_Servico primary key(id_viagem),
+constraint ct_fk1_Servico foreign key(id_cliente) references Cliente(id) on delete restrict on update cascade,
+constraint ct_fk2_Servico foreign key(matricula_vend) references Vendedor(matricula_vend) on delete restrict on update cascade);
+
+create table Remessa(
+numeracao_frota int,
+id_viagem int,
+matricula_mot int,
+constraint ct_pk_Remessa primary key(numeracao_frota, id_viagem, matricula_mot),
+constraint ct_fk1_Remessa foreign key(numeracao_frota) references Onibus(numeracao_frota) on delete restrict on update cascade,
+constraint ct_fk2_Remessa foreign key(id_viagem) references ServicoFretamentoEventual(id_viagem) on delete restrict on update cascade,
+constraint ct_fk3_Remessa foreign key(matricula_mot) references Motorista(matricula_mot) on delete restrict on update cascade);
+
+insert into Departamento(nome)
+values('Recursos Humanos'),
+('Financeiro'),
+('Administrativo'),
+('Comercial'),
+('Operacional'),
+('Contábil'),
+('TI'),
+('Jurídico'),
+('Comunicação'),
+('Marketing');
+
+insert into Funcionario(nome, sexo, cpf, data_nasc, cargo, idDep)
+values('Luis Carlos da Silva', 'M', '11770394435', '1996-05-20', 'Vendedor', 4),
+('Diana Beltrão Quinterno', 'F', '47119875610', '1974-06-08', 'Vendedor', 4),
+('Aida Valadares Baptista', 'F', '25584258774', '1986-06-17', 'Vendedor', 4),
+('Osvaldo Mieiro Cavadas', 'M', '18256820513', '1986-03-18', 'Vendedor', 4),
+('Kayden Barrocas Fontoura', 'O', '81154757010', '1979-06-29', 'Vendedor', 4),
+('Denzel Areosa Goulão', 'M', '17038925963', '1989-07-27', 'Vendedor', 4),
+('Aryan Mena Velasco', 'O', '19782021337', '1977-06-30', 'Vendedor', 4),
+('Joyce Santos Pedroso', 'F', '27567939704', '1985-01-06', 'Vendedor', 4),
+('Mathias Cambezes Vilhena', 'M', '75510452875', '1972-03-07', 'Vendedor', 4),
+('Anselmo Porciúncula Noleto', 'M', '98109016113', '1985-06-30', 'Vendedor', 4),
+('Ari Pinho Remígio', 'M', '85614039292', '1978-09-09', 'Motorista', 5), 
+('Christopher Figueiredo Falcão', 'M', '49631726504', '1983-09-13', 'Motorista', 5),
+('Marcus Lagoa Alencar', 'M', '03475188160', '1988-05-19', 'Motorista', 5),
+('Gilberto Ferreira Silva', 'M', '45558739939', '1974-03-11', 'Motorista', 5),
+('Kael Bastos Oliveira', 'M', '12136265893', '1995-05-03', 'Motorista', 5),
+('Leandro Frota Gentil', 'M', '47908769684', '1990-10-30', 'Motorista', 5),
+('Yasmine Mendes Morgado', 'F', '83367533145', '1993-04-16', 'Motorista', 5),
+('Luan Gonçalves Quintão', 'M', '70922982349', '1987-11-04', 'Motorista', 5),
+('Válter Horta Severo', 'M', '81086360437', '1974-11-03', 'Motorista', 5),
+('Fernando Olivares Carvalho', 'M', '72877989598', '1972-02-05', 'Motorista', 5),
+('Jeferson Feira Saldanha', 'M', '67735622647', '1978-03-22', 'Supervisora de RH', 1),
+('Damian Redondo Brito', 'M', '85870471054', '1982-05-08', 'Assistente Financeiro', 2),
+('Lucas Bacelar Macieira', 'M', '95785218361', '1984-09-20', 'Gestor de TI', 7),
+('Emília Cerveira Fernandes', 'F', '95738602708', '1988-06-16', 'Analista de RH', 1),
+('Noé Casalinho Vaz', 'M', '56294799094', '1983-04-26', 'Advogado', 8);
+
+insert into TelefoneFunc(numero_telefone, matricula_func)
+values(083940966073, 1),
+(083929829834, 2),
+(083966659635, 3),
+(083940106946, 4),
+(083910605910, 5),
+(083997258510, 6),
+(083990032590, 7),
+(08333450675, 8),
+(08345806071, 9),
+(083981458135, 10),
+(08320692805, 11),
+(08327731031, 12),
+(083998387443, 13),
+(083929100042, 14),
+(08333098953, 15),
+(08321307778, 16),
+(08398353183, 17),
+(08322565709, 18),
+(08330272413, 19),
+(083968763463, 20),
+(083979468466, 21),
+(084976499352, 22),
+(081936650044, 23),
+(084991422081, 24),
+(081976818333, 25),
+(081911325680, 23),
+(081946728387, 25),
+(084919134085, 22);
+
+insert into EnderecoFunc(matricula_func, rua, numero, bairro, CEP, cidade, estado)
+values(1, 'Rua Cassiano Pereira', '54A', 'Jardim Paulistano', '58415295', 'Campina Grande', 'Paraíba'),
+(2, 'Avenida Reino Unido da Grã-Bretanha', '89', 'Nações', '58402825', 'Campina Grande', 'Paraíba'),
+(3, 'Vila Doral', '79', 'Três Irmãs', '58423022', 'Campina Grande', 'Paraíba'),
+(4, 'Rua Francisco Roberto', '23B', 'Centenário', '58428222', 'Campina Grande', 'Paraíba'),
+(5, 'Avenida República Islâmica da Mauritânia', '12', 'Nações', '58402800', 'Campina Grande', 'Paraíba'),
+(6, 'Avenida Vinte e Sete de Julho', '46', 'Universitário', '58429130', 'Campina Grande', 'Paraíba'),
+(7, '2ª Travessa Venezuela', '53', 'Tambor', '58414532', 'Campina Grande', 'Paraíba'),
+(8, 'Rua do Juá', '69', 'Tambor', '58414560', 'Campina Grande', 'Paraíba'),
+(9, 'Rua Maria da Conceição Costa Vasconcelos', '79', 'Presidente Médici', '58417755', 'Campina Grande', 'Paraíba'),
+(10, 'Avenida Senador Argemiro de Figueiredo', '46A', 'Itararé', '58411020', 'Campina Grande', 'Paraíba'),
+(11, 'Rua José Augusto Brayner', '41', 'Presidente Médici', '58417745', 'Campina Grande', 'Paraíba'),
+(12, 'Rua Inácio de Oliveira', '20', 'Três Irmãs', '58424134', 'Campina Grande', 'Paraíba'),
+(13, 'Rua Suênia Pereira Neves', '30', 'Dinamérica', '58432465', 'Campina Grande', 'Paraíba'),
+(14, 'Avenida Marechal Floriano Peixoto', '1000', 'Serrotão', '58434500', 'Campina Grande', 'Paraíba'),
+(15, 'Avenida Industrial Ademar Veloso da Silveira', '53', 'Bodocongó', '58430000', 'Campina Grande', 'Paraíba'),
+(16, 'Rua Siqueira Campos', '90', 'Conceição', '58401260', 'Campina Grande', 'Paraíba'),
+(17, 'Avenida Prefeito Severino Bezerra Cabral', '469C', 'Mirante', '58407660', 'Campina Grande', 'Paraíba'),
+(18, 'Rua Prefeito Antônio Luiz Coutinho', '845', 'Tambor', '58414493', 'Campina Grande', 'Paraíba'),
+(19, 'Rua Delmiro Gouveia', '462', 'São José', '58420255', 'Campina Grande', 'Paraíba'),
+(20, 'Rua Heleno de Sousa do Ó', '365', 'Serrotão', '58434120', 'Campina Grande', 'Paraíba'),
+(21, 'Rua Severino Pereira Rodrigues', '965', 'Presidente Médici', '58417760', 'Campina Grande', 'Paraíba'),
+(22, 'Rua Severina B. Pimenteira', '872', 'Nações', '58402740', 'Campina Grande', 'Paraíba'),
+(23, 'Rua Dagoberto Renato Damião de Araújo', '789', 'Palmeira', '58401040', 'Campina Grande', 'Paraíba'),
+(24, 'Rua Miguel Couto', '421', 'São José', '58400326', 'Campina Grande', 'Paraíba'),
+(25, 'Rua Prefeito Antônio Luiz Coutinho', '658', 'Liberdade', '58414285', 'Campina Grande', 'Paraíba');
+
+insert into Motorista(matricula_mot)
+values(11),
+(12),
+(13),
+(14),
+(15),
+(16),
+(17),
+(18),
+(19),
+(20);
+
+insert into CNH(numero_CNH, matricula_mot, categoria_CNH, vencimento)
+values('24213082319', 11, 'D', '2024-02-03'),
+('29554470810', 12, 'D', '2023-08-05'),
+('22535161670', 13, 'AD', '2023-07-27'),
+('89358269671', 14, 'D', '2022-01-29'),
+('12626483916', 15, 'AD', '2022-04-10' ),
+('79984060604', 16, 'AE', '2021-12-02'),
+('99636446805', 17, 'E', '2021-10-29'),
+('50853978516', 18, 'E', '2022-02-14'),
+('39548042380', 19, 'AE', '2020-12-10'),
+('13397909743', 20, 'E', '2024-05-07');
+
+insert into Onibus(numeracao_frota)
+values(1105),
+(1110),
+(11110),
+(11326),
+(11489),
+(11036),
+(11487),
+(11659),
+(11365),
+(11360);
+
+insert into Apolice(num_apolice, numeracao_frota, vencimento)
+values('3389784658', 1105, '2021-02-20'),
+('3334591723', 1110, '2020-07-25'),
+('2909764420', 11110, '2020-12-25'),
+('6443930648', 11326, '2021-01-18'),
+('6447015302', 11489, '2020-12-10'),
+('987419144', 11036, '2021-04-03'),
+('6106580822', 11487, '2020-10-16'),
+(' 900695243', 11659, '2020-11-14'),
+('5865292978', 11365, '2021-02-17'),
+('5276164870', 11360, '2020-10-01');
+
+insert into CRLV(renavam, numeracao_frota, capacidade, ano, tipo, vencimento)
+values('31864671230', 1105, 50, 2014, 'RODOVIÁRIO', '2020-09-20'),
+('18006339109', 1110, 45, 2016, 'RODOVIÁRIO', '2021-02-06'),
+('50657371697', 11110, 41, 2016, 'URBANO', '2020-09-06'),
+('87906906460', 11326, 28, 2018, 'RODOVIÁRIO', '2021-01-22'),
+('46968626413', 11489, 50, 2014, 'RODOVIÁRIO', '2021-04-09'),
+('62078260009', 11036, 50, 2019, 'RODOVIÁRIO', '2020-11-18'),
+('56480442644', 11487, 48, 2014, 'RODOVIÁRIO', '2021-03-21'),
+('66834533059', 11659, 49, 2011, 'RODOVIÁRIO', '2020-12-04'),
+('66925181044', 11365, 41, 2013, 'RODOVIÁRIO', '2020-10-03'),
+('99725352074', 11360, 50, 2006, 'RODOVIÁRIO', '2021-03-05');
+
+insert into Vendedor(matricula_vend)
+values(1),
+(2),
+(3),
+(4),
+(5),
+(6),
+(7),
+(8),
+(9),
+(10);
+
+insert into Cliente(nome)
+values('Gabrielly Pereira Fernandes'),
+('Melissa Santos Souza'),
+('Thaís Pinto Barbosa'),
+('Antônio Goncalves Ribeiro'),
+('Gabriel Cunha Santos'),
+('Fábio Pinto Correia'),
+('Isabela Sousa Barbosa'),
+('Luís Cardoso Barros'),
+('Nicolas Azevedo Cunha'),
+('Vitor Alves Araujo'),
+('Igreja Congregacional'),
+('Alfredo Dantas'),
+('Motiva'),
+('Lourdinas'),
+('Accenture'),
+('Autentico'),
+('GEO'),
+('Marista'),
+('Igreja Nossa Senhora do Rosário'),
+('Maple Bear');
+
+insert into TelefoneCliente(numero_telefone, id_cliente)
+values(011989609589, 1),
+(06630817259, 2),
+(066969479955, 2),
+(083945399826, 3),
+(011995337277, 4),
+(021964864692, 5),
+(021959709237, 5),
+(05158735678, 6),
+(084983214657, 7),
+(04427233734, 8),
+(07187651234, 9),
+(06557667315, 10),
+(011985761923, 11),
+(011987341297, 11),
+(066912937485, 12),
+(083987654321, 13),
+(021978239123, 14),
+(099918274034, 15),
+(081934223531, 16),
+(081986676771, 16),
+(085989900998, 17),
+(049945567123, 18),
+(063980806751, 19),
+(063987987897, 19),
+(084997978999, 20);
+
+insert into EnderecoCliente(id_cliente, rua, numero, bairro, CEP, cidade, estado)
+values(1, 'Rua Raul Pimentel',  '1951', 'Liberdade', '18700420', 'Avaré', 'SP'),
+(2, 'Avenida Cristo Redentor', '281', 'Catolé', '78130235', 'Várzea Grande', 'MT'),
+(3, 'Rua Olívio de Moraes Magalhães', '1577', 'Roger', '58075656', 'João Pessoa', 'PB'),
+(4, 'Rua Nipur', '497', 'Osasco', '04663030', 'São Paulo', 'SP'),
+(5, 'Rua dos Diamantes', '474', 'Copacabana', '21510003', 'Rio de Janeiro', 'RJ'),
+(6, 'Rua Salgado Filho', '1643', 'Jeremias', '94820450', 'Alvorada', 'RS'),
+(7, 'Vila São Jorge', '642', 'Lagoa Nova', '59114149', 'Natal', 'RN'),
+(8, 'Rua C', '1330', 'Serrotão', '87708240', 'Paranavaí', 'PR'),
+(9, '1ª Travessa Nossa Senhora da Aparecida', '875', 'Ramadinha', '41342874', 'Salvador', 'BA'),
+(10, 'Rua Coronel Manoel Gomes', '1113', 'Conde', '78115575', 'Várzea Grande', 'MT'),
+(11, 'Rua Marechal Deodoro', '88A', 'Centro', '18620970', 'Anhembi', 'SP'),
+(12, 'Rua Cinco', '484', 'Centro', '78635970', 'Água Boa', 'MT'),
+(13, 'Rua das Piabas', '10', 'Povoado', '58270977', 'Araçagi', 'PB'),
+(14, 'Rua Professor Manhães', '1243', 'Parque Turf Club', '28013100', 'Campos dos Goytacazes', 'RJ'),
+(15, 'Avenida Major Silva Filho', '284', 'Centro', '65368970', 'Araguanã', 'MA'),
+(16, 'Rua do Comércio', '20', 'Centro', '55332970', 'Barra do Brejo', 'PE'),
+(17, 'Rua Paulino Félix', '99', 'Centro', '63560970', 'Acopiara', 'CE'),
+(18, 'Rua Principal', '65', 'Distrito de Alto Alegre', '89666970', 'Alto Alegre', 'SC'),
+(19, 'Rua Marinópolis', '56', 'Setor Central', '77845970', 'Aragominas', 'TO'),
+(20, 'Travessa Edilson Silva', '555C', 'Nossa Senhora de Nazaré', '59062199', 'Natal', 'RN');
+
+insert into PessoaFisica(CPF, id_cliente, data_nasc, sexo)
+values('88133087015', 1, '1968-02-01', 'F'),
+('58355765010', 2, '1963-06-07', 'F'),
+('61548581089', 3, '1966-12-18', 'F'),
+('29697177007', 4, '1983-07-27', 'M'),
+('49416399019', 5, '1978-03-05', 'M'),
+('21075465095', 6, '1982-10-21', 'M'),
+('69211662010', 7, '1975-05-23', 'F'),
+('08243264078', 8, '1967-07-25', 'M'),
+('39595877085', 9, '1979-11-28', 'M'),
+('71034726021', 10, '1980-12-06', 'M');
+
+insert into PessoaJuridica(CNPJ, id_cliente, segmento)
+values('80135545000144', 11, 'Igreja'),
+('47695032000112', 12, 'Escola'),
+('93327345000135', 13, 'Escola'),
+('00332100000115', 14, 'Escola'),
+('10132968000125', 15, 'TI'),
+('75715649000198', 16, 'Escola'),
+('12141769000109', 17, 'Escola'),
+('62136920000199', 18, 'Escola'),
+('22595688000132', 19, 'Igreja'),
+('35863784000166', 20, 'Escola');
+
+insert into ServicoFretamentoEventual(descricao_viagem, km_total, valor_total, quantidade_pessoas, data_hora_ida, data_hora_volta, id_cliente, matricula_vend)
+values('Viagem de Campina Grande para João Pessoa', 412, 2920.00, 44, '2017-11-29 21:42:00', '2017-11-30 12:48:00', 1, 1),
+('Viagem de Campina Grande para João Pessoa', 552, 2359.00, 35, '2016-05-28 13:12:41', '2016-05-30 14:00:00', 2, 2),
+('Viagem de Campina Grande para Recife', 421, 2881.00, 38, '2018-06-06 03:07:30', '2018-06-10 22:00:00', 3, 3),
+('Viagem de Campina Grande para João Pessoa', 446, 2027.00, 49, '2018-04-03 22:35:54', '2018-04-05 12:00:35', 4, 4),
+('Viagem de Campina Grande para Recife', 409, 2362.00, 21, '2015-09-01 14:44:13', '2015-09-02 15:00:13', 5, 5),
+('Viagem de Campina Grande para Recife', 569, 2825.00, 46, '2018-05-08 02:42:53', '2018-05-10 08:42:53', 6, 6),
+('Viagem de Campina Grande para Recife', 418, 2118.00, 50, '2017-03-15 06:14:57', '2017-03-20 10:22:17', 7, 7),
+('Viagem de Campina Grande para João Pessoa', 302, 1281.00, 60, '2019-03-21 06:33:42', '2019-03-22 08:36:42', 8, 8),
+('Viagem de Campina Grande para Pipa', 588, 1316.00, 30, '2018-08-27 17:33:41', '2018-08-29 18:23:54', 9, 10),
+('Viagem de Campina Grande para João Pessoa', 424, 1371.00, 49, '2015-08-10 20:34:03', '2015-08-11 20:34:03', 10, 4),
+('Acampamento da Igreja Congregacional no Conde', 163, 3500.00, 50, '2019-11-12 07:00:00', '2019-11-15 15:00:00', 11, 1),
+('Visita ao repteis da caatinga em Puxinanã', 50, 1500.00, 35, '2020-03-20 07:00:00', '2020-03-20 13:00:00', 12, 2),
+('Visita ao museu do amanhã no Rio de Janeiro', 80, 1500.00, 100, '2018-04-28 05:00:00', '2018-04-28 20:00:00', 13, 3),
+('Excursão para Porto de Galinhas', 260, 5000.00, 90, '2017-10-12 08:00:00', '2017-10-15 18:00:00', 14, 4),
+('Evento empresarial em Salvador', 300, 6500.00, 120, '2015-01-10 08:00:00', '2015-01-15 12:00:00', 15, 5),
+('Viagem de férias para Maragogi', 300, 8000.00, 25, '2019-05-19 08:00:00', '2019-05-22 18:00:00', 16, 6),
+('Colonia de ferias em Jacumã', 125, 2000.00, 80, '2020-02-01 08:00:00', '2020-02-04 16:00:00', 17, 7),
+('Visita ao museu dos três pandeiros em Campina Grande', 30, 1500.00, 50, '2020-03-01 08:00:00', '2020-03-01 11:00:00', 18, 8),
+('Acampamento Igreja Católica em Cajazeiras', 20, 1500.00, 50, '2019-04-01 08:00:00', '2019-04-01 11:00:00', 19, 10),
+('Visita ao museu do algodão em Campina Grande', 125, 4000.00, 120, '2020-01-05 07:00:00', '2020-01-10 16:00:00', 20, 4);
+
+insert into Remessa(numeracao_frota, id_viagem, matricula_mot)
+values(1105, 1, 11),
+(1110, 2, 12),
+(11110, 3, 13),
+(11489, 4, 14),
+(11326, 5, 15),
+(11036, 6, 16),
+(11360, 7, 17),
+(11326, 8, 18),
+(11365, 8, 19),
+(11487, 9, 20),
+(11659, 10, 14),
+(11360, 11, 16),
+(11365, 12, 11),
+(11489, 13, 20),
+(11489, 13, 11),
+(11036, 13, 19),
+(11036, 13, 15),
+(11365, 14, 17),
+(1105, 14, 16),
+(1105, 15, 14),
+(11489, 15, 12),
+(11365, 15, 13),
+(11326, 16, 20),
+(1110, 17, 17),
+(11659, 17, 19),
+(11036, 18, 15),
+(11360, 19, 15),
+(11036, 20, 20),
+(11489, 20, 14),
+(11326, 20, 11);
+
+/*QUESTÃO 1A
+LISTAR OS VEÍCULOS DOS MAIS NOVOS AOS MAIS ANTIGOS 
+*/
+select o.numeracao_frota as numeracao_da_frota, c.ano as ano_do_veiculo
+from onibus o, CRLV c 
+where o.numeracao_frota = c.numeracao_frota
+order by ano_do_veiculo desc;
+
+/*QUESTÃO 1B
+LISTAR AS VIAGENS REALIZADAS ENTRE 2016 E 2019 EM ORDEM CRESCENTE
+*/
+select id_viagem, descricao_viagem, data_hora_ida as data_viagem
+from ServicoFretamentoEventual
+where data_hora_ida between '2016-01-01 00:00:00' and '2019-12-31 23:59:59'
+order by data_hora_ida asc;
+
+/*QUESTÃO 1C
+LISTAR AS VIAGENS FEITAS A JOÃO PESSOA
+*/
+select id_viagem, descricao_viagem, data_hora_ida as data_viagem 
+from ServicoFretamentoEventual
+where descricao_viagem like '%João Pessoa%'
+order by data_hora_ida desc;
+
+/*QUESTÃO 1D
+QUANTIDADE DE VEÍCULOS PELO SEU TIPO  
+*/
+select tipo, count(renavam) as quantidade
+from CRLV
+group by tipo;
+
+/*QUESTÃO 1E
+LISTA DE CLIENTES QUE A MEDIA DE VIAGENS ESTÁ ACIMA DE 3000 REAIS  
+*/
+select s.id_cliente as id_cliente, c.nome as nome_cliente
+from Cliente c, ServicoFretamentoEventual s
+where c.id = s.id_cliente
+group by s.id_cliente
+having avg(s.valor_total) > 3000;
+
+/*---------------------------------------------------------------------------------*/
+
+/*QUESTÃO 2A
+ADICIONAR COLUNA "PLACA DO VEÍCULO" NA TABELA CRLV 
+*/
+alter table CRLV
+add placa_veiculo char(7) check(length(placa_veiculo) = 7); 
+
+/*QUESTÃO 2B
+REMOVER COLUNA "PLACA DO VEÍCULO" NA TABELA CRLV 
+*/
+alter table CRLV
+drop placa_veiculo; 
+
+/*QUESTÃO 2C
+ALTERAR O TIPO DO ATRIBUTO "ANO" PARA YEAR
+*/
+alter table CRLV
+modify ano year;
+
+/*QUESTÃO 2D
+ALTERAR O NOME DA COLUNA "NOME" PARA "NOME_FUNC"
+*/
+alter table Funcionario
+change nome nome_func varchar(150) not null;
+
+/*QUESTÃO 2E
+ALTERAR O NOME DA TABELA "ONIBUS" PARA "VEICULO"
+*/
+alter table Onibus 
+rename to Veiculo;
+
+/*QUESTÃO 2F
+ATRIBUINDO O "UNIQUE" AO ATRIBUTO "NOME"
+*/
+alter table Cliente
+add constraint ct_nome_cliente
+unique(nome);
+
+/*---------------------------------------------------------------------------------*/
+
+/*QUESTÃO 3: PRIMEIRA OPERAÇÃO*/
+update PessoaJuridica set segmento = 
+	case
+		when segmento = 'Escola' then 'Educação'
+        else 'Outros'
+	end;
+
+/*QUESTÃO 3: SEGUNDA OPERAÇÃO*/
+update ServicoFretamentoEventual set valor_total = 
+	case
+		when id_cliente = 15 then valor_total - (0.1 * valor_total)
+        else valor_total - (0.05 * valor_total)
+	end;
+
+/*---------------------------------------------------------------------------------*/
+
+/*QUESTÃO 4: PRIMEIRO GATILHO*/
+delimiter $$
+create trigger impedirServico
+before insert on ServicoFretamentoEventual
+for each row
+begin
+	
+    if new.data_hora_ida > new.data_hora_volta or
+    new.data_hora_ida = new.data_hora_volta
+    then
+		set new.valor_total = null;
+	end if;
+end $$
+
+/*CÓDIGO PARA TESTAR O PRIMEIRO GATILHO*/
+insert into ServicoFretamentoEventual(descricao_viagem, km_total, valor_total, quantidade_pessoas, data_hora_ida, data_hora_volta, id_cliente, matricula_vend)
+values('DATA E HORA IDA MAIOR QUE A DATA E HORA VOLTA', 412, 2920.00, 44, '2017-11-29 21:42:00', '2017-11-22 21:42:00', 1, 1);
+
+insert into ServicoFretamentoEventual(descricao_viagem, km_total, valor_total, quantidade_pessoas, data_hora_ida, data_hora_volta, id_cliente, matricula_vend)
+values('DATA E HORA IDA IGUAL A DATA E HORA VOLTA', 412, 2920.00, 44, '2017-11-29 21:42:00', '2017-11-29 21:42:00', 1, 1);
+
+insert into ServicoFretamentoEventual(descricao_viagem, km_total, valor_total, quantidade_pessoas, data_hora_ida, data_hora_volta, id_cliente, matricula_vend)
+values('DATA E HORA IDA MENOR QUE DATA E HORA VOLTA', 412, 2920.00, 44, '2017-11-29 21:42:00', '2017-11-30 21:42:00', 1, 1);
+
+/*QUESTÃO 4: SEGUNDO GATILHO*/
+delimiter $$
+create trigger verificaVencimento
+before update on CRLV
+for each row
+begin
+    if new.vencimento < curdate()
+    then
+		set new.renavam = null;
+	end if;
+end $$
+
+/*CÓDIGO PARA TESTAR O SEGUNDO GATILHO*/
+update CRLV set vencimento = '2020-01-22' where renavam = '62078260009';
+update CRLV set vencimento = '2020-07-30' where renavam = '62078260009';
